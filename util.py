@@ -1,4 +1,4 @@
-#import h5py
+import h5py
 import numpy as np
 import scipy.io as sio
 import torch
@@ -116,7 +116,8 @@ class DATA_LOADER(object):
 
 
     def read_matdataset(self, opt):
-        matcontent = sio.loadmat(opt.dataroot + "/" + opt.dataset + "/" + opt.image_embedding + ".mat")
+        matcontent = sio.loadmat('./'+opt.dataroot + "/" + opt.dataset + "/" + opt.image_embedding + ".mat") ## diy
+
         feature = matcontent['features'].T
         label = matcontent['labels'].astype(int).squeeze() - 1
         matcontent = sio.loadmat(opt.dataroot + "/" + opt.dataset + "/" + opt.class_embedding + "_splits.mat")

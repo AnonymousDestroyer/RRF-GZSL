@@ -17,9 +17,11 @@ import sys
 import model
 from sklearn.neighbors import KNeighborsClassifier
 
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataset', default='CUB', help='CUB')
-parser.add_argument('--dataroot', default='/home/hanzy/datasets', help='path to dataset')
+parser.add_argument('--dataroot', default='./data', help='path to dataset')
 parser.add_argument('--matdataset', default=True, help='Data in matlab format')
 parser.add_argument('--image_embedding', default='res101')
 parser.add_argument('--class_embedding', default='att')

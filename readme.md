@@ -60,12 +60,17 @@ For example:
 
 *  Softmax as the final classifier:
 ```python
-python3 RRF_GZSL.py --dataset CUB --syn_num 400 --preprocessing --batch_size 512 --attSize 312 --nz 312 --nepoch 208 --i_c 0.1 --cls_weight 0.2 --lr 0.0001 --manualSeed 3483 --nclass_all 200 --nclass_seen 150 --lr_dec --lr_dec_ep 100 --lr_dec_rate 0.95 --center_margin 190 --center_weight 0.1 --final_classifier softmax
+python RRF_GZSL.py --dataset CUB --syn_num 400 --preprocessing --batch_size 512 --attSize 312 --nz 312 --nepoch 208 --i_c 0.1 --cls_weight 0.2 --lr 0.0001 --manualSeed 3483 --nclass_all 200 --nclass_seen 150 --lr_dec --lr_dec_ep 100 --lr_dec_rate 0.95 --center_margin 190 --center_weight 0.1 --final_classifier softmax
 ```
 
 *  knn as the final classifier:
 ```python
-python3 RRF_GZSL.py --dataset CUB --syn_num 600 --preprocessing --batch_size 512 --attSize 312 --nz 312 --nepoch 851 --i_c 0.1 --cls_weight 0.2 --lr 0.0001 --manualSeed 3483 --nclass_all 200 --nclass_seen 150 --lr_dec --lr_dec_ep 100 --lr_dec_rate 0.95 --center_margin 190 --center_weight 0.1 --final_classifier knn --k 5
+python RRF_GZSL.py --dataset CUB --syn_num 600 --preprocessing --batch_size 512 --attSize 312 --nz 312 --nepoch 851 --i_c 0.1 --cls_weight 0.2 --lr 0.0001 --manualSeed 3483 --nclass_all 200 --nclass_seen 150 --lr_dec --lr_dec_ep 100 --lr_dec_rate 0.95 --center_margin 190 --center_weight 0.1 --final_classifier knn --k 5
+```
+
+* train the sun dataset:
+```python
+python RRF_GZSL.py --dataset SUN --syn_num 600 --preprocessing --batch_size 512 --attSize 102 --nz 102 --nepoch 851 --i_c 0.1 --cls_weight 0.2 --lr 0.0001 --manualSeed 3483 --nclass_all 908 --nclass_seen 717 --lr_dec --lr_dec_ep 100 --lr_dec_rate 0.95 --center_margin 190 --center_weight 0.1 --final_classifier knn --k 5
 ```
 
 ### Citation

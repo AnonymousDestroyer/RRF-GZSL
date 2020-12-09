@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 def Other_label(labels,num_classes):
     index=torch.randint(num_classes, (labels.shape[0],)).to(labels.device)
     other_labels=labels+index
@@ -38,6 +39,7 @@ class TripCenterLoss_margin(nn.Module):
         dist_other = distmat[mask_other]
         loss = torch.max(margin+dist-dist_other,torch.tensor(0.0).cuda()).sum() / batch_size
         return loss
+
 
 class TripCenterLoss_min_margin(nn.Module):
 

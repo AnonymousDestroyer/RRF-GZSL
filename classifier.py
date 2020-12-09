@@ -23,11 +23,13 @@ class CLASSIFIER:
         self.lr = _lr
         self.beta1 = _beta1
         self.optimizer = optim.Adam(self.model.parameters(), lr=_lr, betas=(_beta1, 0.999))
+
         if self.cuda:
             self.model.cuda()
             self.criterion.cuda()
             self.input = self.input.cuda()
             self.label = self.label.cuda()
+
         self.index_in_epoch = 0
         self.epochs_completed = 0
         self.ntrain = self.train_X.size()[0]

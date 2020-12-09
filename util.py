@@ -4,6 +4,9 @@ import scipy.io as sio
 import torch
 from sklearn import preprocessing
 import sys
+import datetime
+import termcolor
+
 
 def weights_init(m):
     classname = m.__class__.__name__
@@ -33,6 +36,24 @@ class Logger(object):
         f.close()
 
 class DATA_LOADER(object):
+    """
+    DataLoader
+
+    Mian function ：get the params
+        self.attribute
+        self.train_feature
+        self.train_label
+        self.test_seen_feature
+        self.test_seen_label
+        self.test_unseen_feature
+        self.test_unseen_label
+        self.ntrain
+        self.seenclasses
+        self.unseenclasses
+        self.train_class
+        self.ntrain_class
+        self.ntest_class
+    """
     def __init__(self, opt):
         if opt.matdataset:
             if opt.dataset == 'imageNet1K':
@@ -44,6 +65,11 @@ class DATA_LOADER(object):
                 
     # not tested
     def read_h5dataset(self, opt):
+        """
+        读取H5类型
+        :param opt:
+        :return:
+        """
         # read image feature
         fid = h5py.File(opt.dataroot + "/" + opt.dataset + "/" + opt.image_embedding + ".hdf5", 'r')
         feature = fid['feature'][()]
@@ -77,30 +103,35 @@ class DATA_LOADER(object):
         self.nclasses = self.seenclasses.size(0)
 
     def read_matimagenet(self, opt):
+        """
+        读取ImageNet dataset
+        :param opt:
+        :return:
+        """
         if opt.preprocessing:
             print('MinMaxScaler...')
-            scaler = preprocessing.MinMaxScaler()
-            matcontent = h5py.File(opt.dataroot + "/" + opt.dataset + "/" + opt.image_embedding + ".mat", 'r')
-            feature = scaler.fit_transform(np.array(matcontent['features']))
-            label = np.array(matcontent['labels']).astype(int).squeeze() - 1
-            feature_val = scaler.transform(np.array(matcontent['features_val']))
-            label_val = np.array(matcontent['labels_val']).astype(int).squeeze() - 1
-            matcontent.close()
-            matcontent = h5py.File('/BS/xian/work/data/imageNet21K/extract_res/res101_1crop_2hops_t.mat', 'r')
-            feature_unseen = scaler.transform(np.array(matcontent['features']))
-            label_unseen = np.array(matcontent['labels']).astype(int).squeeze() - 1
-            matcontent.close()
+            scalar = preprocessing.MinMaxScaler()
+            mat_content = h5py.File(opt.dataroot + "/" + opt.dataset + "/" + opt.image_embedding + ".mat", 'r')
+            feature = scalar.fit_transform(np.array(mat_content['features']))
+            label = np.array(mat_content['labels']).astype(int).squeeze() - 1
+            feature_val = scalar.transform(np.array(mat_content['features_val']))
+            label_val = np.array(mat_content['labels_val']).astype(int).squeeze() - 1
+            mat_content.close()
+            mat_content = h5py.File('/BS/xian/work/data/imageNet21K/extract_res/res101_1crop_2hops_t.mat', 'r')
+            feature_unseen = scalar.transform(np.array(mat_content['features']))
+            label_unseen = np.array(mat_content['labels']).astype(int).squeeze() - 1
+            mat_content.close()
         else:
-            matcontent = h5py.File(opt.dataroot + "/" + opt.dataset + "/" + opt.image_embedding + ".mat", 'r')
-            feature = np.array(matcontent['features'])
-            label = np.array(matcontent['labels']).astype(int).squeeze() - 1
-            feature_val = np.array(matcontent['features_val'])
-            label_val = np.array(matcontent['labels_val']).astype(int).squeeze() - 1
-            matcontent.close()
+            mat_content = h5py.File(opt.dataroot + "/" + opt.dataset + "/" + opt.image_embedding + ".mat", 'r')
+            feature = np.array(mat_content['features'])
+            label = np.array(mat_content['labels']).astype(int).squeeze() - 1
+            feature_val = np.array(mat_content['features_val'])
+            label_val = np.array(mat_content['labels_val']).astype(int).squeeze() - 1
+            mat_content.close()
 
 
-        matcontent = sio.loadmat(opt.dataroot + "/" + opt.dataset + "/" + opt.class_embedding + ".mat")
-        self.attribute = torch.from_numpy(matcontent['w2v']).float()
+        mat_content = sio.loadmat(opt.dataroot + "/" + opt.dataset + "/" + opt.class_embedding + ".mat")
+        self.attribute = torch.from_numpy(mat_content['w2v']).float()
         self.train_feature = torch.from_numpy(feature).float()
         self.train_label = torch.from_numpy(label).long() 
         self.test_seen_feature = torch.from_numpy(feature_val).float()
@@ -116,19 +147,34 @@ class DATA_LOADER(object):
 
 
     def read_matdataset(self, opt):
-        matcontent = sio.loadmat('./'+opt.dataroot + "/" + opt.dataset + "/" + opt.image_embedding + ".mat") ## diy
+        """
+        读取Mat文件
+        :param opt:
+        :return:
+        """
+        mat_content = sio.loadmat('./'+opt.dataroot + "/" + opt.dataset + "/" + opt.image_embedding + ".mat") ## diy
 
-        feature = matcontent['features'].T
-        label = matcontent['labels'].astype(int).squeeze() - 1
-        matcontent = sio.loadmat(opt.dataroot + "/" + opt.dataset + "/" + opt.class_embedding + "_splits.mat")
+        # 图片的视觉特征和标签
+        feature = mat_content['features'].T
+        label = mat_content['labels'].astype(int).squeeze() - 1 # 要从零开始
+
+        ### diy
+        mat_content = sio.loadmat(opt.dataroot + "/" + opt.dataset + "/" + opt.class_embedding_file)  # Get the semantic feature
+        ### diy end
+
+
         # numpy array index starts from 0, matlab starts from 1
-        trainval_loc = matcontent['trainval_loc'].squeeze() - 1
-        train_loc = matcontent['train_loc'].squeeze() - 1
-        val_unseen_loc = matcontent['val_loc'].squeeze() - 1
-        test_seen_loc = matcontent['test_seen_loc'].squeeze() - 1
-        test_unseen_loc = matcontent['test_unseen_loc'].squeeze() - 1
+        trainval_loc = mat_content['trainval_loc'].squeeze() - 1 # trainval_loc 10320 numpy lis
+        print("traincal_loc:{} type:{}".format(trainval_loc,type(trainval_loc)))
+
+
+        train_loc = mat_content['train_loc'].squeeze() - 1 # train_loc 9280
+
+        val_unseen_loc = mat_content['val_loc'].squeeze() - 1
+        test_seen_loc = mat_content['test_seen_loc'].squeeze() - 1
+        test_unseen_loc = mat_content['test_unseen_loc'].squeeze() - 1
     
-        self.attribute = torch.from_numpy(matcontent['att'].T).float() 
+        self.attribute = torch.from_numpy(mat_content['att'].T).float() # 102*717 --》 717*012
         if not opt.validation:
             if opt.preprocessing:
                 if opt.standardization:
@@ -286,3 +332,16 @@ class DATA_LOADER(object):
             batch_label[i] = self.train_label[idx_file]
             batch_att[i] = self.attribute[batch_label[i]] 
         return batch_feature, batch_label, batch_att
+
+
+
+def get_time_now(mode:str):
+    """
+    get the time now
+    :param mode:  1 file_name_time ,2 show_time
+    :return: time
+    """
+    if mode=='file_name_time':
+        return str(datetime.datetime.now().strftime("%Y%m%d_%H%M%S"))
+    else:
+        return str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
